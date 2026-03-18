@@ -3,13 +3,11 @@ import random
 
 class Tesoro:
     def __init__(self, imagenes):
-        # --- ATRIBUTOS PRIVADOS (Encapsulamiento) ---
         self.__imagenes = imagenes
         self.__image = random.choice(self.__imagenes)
         self.__rect = self.__image.get_rect()
         self.reubicar()
         
-    # --- GETTERS ---
     @property
     def rect(self):
         return self.__rect
@@ -18,7 +16,6 @@ class Tesoro:
     def image(self):
         return self.__image
 
-    # --- MÉTODOS DE LÓGICA ---
     def reubicar(self):
         """Cambia la posición y la imagen del tesoro de forma aleatoria"""
         self.__rect.x = random.randint(50, 750)
