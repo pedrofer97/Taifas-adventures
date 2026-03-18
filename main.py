@@ -6,18 +6,15 @@ from enemigo import Raton, RatonJefe
 from tesoro import Tesoro
 from pocion import Pocion
 
-# --- INICIALIZACIÓN ---
 pygame.init()
 pygame.mixer.init()
 ANCHO, ALTO = 800, 600
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Taifa se va de compras")
-reloj = pygame.time.Clock() # [cite: 58] Control de tiempo y FPS
+reloj = pygame.time.Clock()
 
-# --- CARGA DE RECURSOS ---
 ORO = (255, 215, 0)
 
-# Carga de imágenes (Requisito: Dibujos bien definidos) [cite: 52]
 fondo_inicio = pygame.transform.scale(pygame.image.load("assets/taifi/inicio.png"), (ANCHO, ALTO))
 escenario = pygame.transform.scale(pygame.image.load("assets/taifi/escenario.png"), (ANCHO, ALTO))
 
@@ -37,7 +34,6 @@ ratones_imgs = [pygame.transform.scale(pygame.image.load(f"assets/taifi/{n}"), (
                 for n in ["ratonBlanco.png", "ratonMarron.png", "ratonNegro.png"]]
 raton_jefe_img = pygame.transform.scale(pygame.image.load("assets/taifi/ratonJefe.png"), (90, 90))
 
-# Sonidos y música [cite: 56]
 s_choque = pygame.mixer.Sound("assets/taifi/sonidos/choque.wav")
 miau = pygame.mixer.Sound("assets/taifi/sonidos/miau.wav")
 
@@ -45,12 +41,10 @@ pygame.mixer.music.load("assets/taifi/sonidos/musica_inicio.mp3")
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1)
 
-# Fuentes importadas [cite: 57]
 fuente_especial = pygame.font.Font("assets/taifi/fuente/EnchantedLand.otf", 80)
 fuente_pts = pygame.font.SysFont("Arial", 30, bold=True)
 fuente_reglas = pygame.font.SysFont("Arial", 22)
 
-# --- CONFIGURACIÓN DE ESTADOS ---
 MENU, REGLAS, JUEGO, RESULTADOS = 0, 1, 2, 3
 estado_actual = MENU
 puntuacion = 0
@@ -73,13 +67,12 @@ pygame.time.set_timer(APARECER_POCION, 15000)
 
 ejecutando = True
 while ejecutando:
-    reloj.tick(60) # Control de FPS para movimiento fluido [cite: 47]
+    reloj.tick(60) 
     
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             ejecutando = False
-        
-        # Entrada de usuario [cite: 55]
+    
         if evento.type == pygame.KEYDOWN and evento.key == pygame.K_SPACE:
             if estado_actual == MENU: 
                 estado_actual = REGLAS
@@ -103,7 +96,6 @@ while ejecutando:
             if evento.type == APARECER_POCION:
                 item_resistencia.reubicar()
 
-    # --- LÓGICA DE PANTALLAS ---
     if estado_actual == MENU:
         pantalla.blit(fondo_inicio, (0, 0))
         txt_start = fuente_pts.render("PULSA ESPACIO PARA CONTINUAR", True, ORO)
@@ -131,21 +123,17 @@ while ejecutando:
         pantalla.blit(escenario, (0, 0))
         pantalla.blit(cesta_img, cesta_rect)
         
-        # Tiempo [cite: 58]
         segundos_pasados = (pygame.time.get_ticks() - tiempo_inicio) // 1000
         tiempo_restante = max(0, DURACION_MAXIMA - segundos_pasados)
         if tiempo_restante <= 0: estado_actual = RESULTADOS
 
-        # Transformación
         if puntuacion >= 10 and not taifa_jugador.es_hechicera:
             taifa_jugador.es_hechicera = True
             lista_ratones.clear()
 
-        # Jugador
         taifa_jugador.mover(pygame.key.get_pressed(), miau)
         taifa_jugador.dibujar(pantalla)
 
-        # Tesoros (Uso de .rect privado mediante propiedad)
         if not taifa_jugador.tiene_tesoro:
             tesoro_obj.dibujar(pantalla)
             if taifa_jugador.rect.colliderect(tesoro_obj.rect) and not taifa_jugador.dormida:
@@ -157,8 +145,7 @@ while ejecutando:
                 puntuacion += 1
                 taifa_jugador.tiene_tesoro = False
                 tesoro_obj.reubicar()
-                
-        # Poción (Uso de .activa y .actualizar)
+
         item_resistencia.actualizar()
         if item_resistencia.activa:
             item_resistencia.dibujar(pantalla)
@@ -166,10 +153,9 @@ while ejecutando:
                 taifa_jugador.energia = 100
                 item_resistencia.activa = False
 
-        # Enemigos y Polimorfismo [cite: 40, 41]
         if not taifa_jugador.es_hechicera:
             for r in lista_ratones[:]:
-                r.mover() # Mueve en línea recta (Raton)
+                r.mover()
                 r.dibujar(pantalla)
                 if taifa_jugador.rect.colliderect(r.rect):
                     s_choque.play()
@@ -177,7 +163,6 @@ while ejecutando:
                     tesoro_obj.reubicar()
                     lista_ratones.remove(r)
         else:
-            # Polimorfismo: Jefe usa mover(objetivo) en lugar de mover()
             jefe.mover(taifa_jugador.rect) 
             jefe.dibujar(pantalla)
             if taifa_jugador.rect.colliderect(jefe.rect):
@@ -187,7 +172,6 @@ while ejecutando:
                 tesoro_obj.reubicar()
                 jefe.rect.x = -100
 
-        # UI [cite: 50]
         pygame.draw.rect(pantalla, (169, 40, 40), (20, 20, 200, 20))
         pygame.draw.rect(pantalla, (34, 177, 76), (20, 20, taifa_jugador.energia * 2, 20))
         txt_puntos = fuente_pts.render(f"Tesoros: {puntuacion}", True, ORO)
@@ -197,25 +181,19 @@ while ejecutando:
 
     elif estado_actual == RESULTADOS:
         pantalla.fill((0, 0, 0))
-        # Título común
         msg = fuente_especial.render("¡TIEMPO AGOTADO!", True, ORO)
         pantalla.blit(msg, msg.get_rect(center=(ANCHO//2, 150)))
-        
-        # Mostramos siempre la puntuación numérica
+
         txt_puntos = fuente_pts.render(f"Puntuación Final: {puntuacion}", True, (255, 255, 255))
         pantalla.blit(txt_puntos, txt_puntos.get_rect(center=(ANCHO//2, 280)))
 
         if puntuacion == 0:
-            # Mensaje si pierde todo
             txt_final = fuente_pts.render("¡Los ratones te quitaron todos tus tesoros!", True, (255, 100, 100))
         else:
-            # Mensaje si consigue algo
             txt_final = fuente_pts.render("¡Conseguiste llevarte tesoros a casa!", True, (100, 255, 100))
-        
-        # Dibujamos el mensaje personalizado
+
         pantalla.blit(txt_final, txt_final.get_rect(center=(ANCHO//2, 380)))
         
-        # Instrucción para reiniciar
         retry = fuente_pts.render("Pulsa ESPACIO para volver al menú", True, (200, 200, 200))
         pantalla.blit(retry, retry.get_rect(center=(ANCHO//2, 500)))
 
