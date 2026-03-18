@@ -37,7 +37,7 @@ Para jugar a Taifa's Adventures, necesitas tener instalado **Python** y la libre
    ```bash
    pip install pygame
 
-3. **Ejecuta el juego:
+3. **Ejecuta el juego:**
    ```bash
    python main.py
 
